@@ -26,24 +26,20 @@ pipeline {
                 script {
 
                     if (env.BRANCH_NAME == "dev") {
-                        echo " Deploying DEV"
-
                         sh """
                         docker rm -f ${APP_NAME}-dev || true
-
                         docker run -d -p 3004:3000 \
+                        -e BRANCH=dev \
                         --name ${APP_NAME}-dev \
                         ${APP_NAME}:dev
                         """
                     }
 
                     if (env.BRANCH_NAME == "prod") {
-                        echo "Deploying PROD"
-
                         sh """
                         docker rm -f ${APP_NAME}-prod || true
-
                         docker run -d -p 3003:3000 \
+                        -e BRANCH=prod \
                         --name ${APP_NAME}-prod \
                         ${APP_NAME}:prod
                         """
@@ -51,54 +47,14 @@ pipeline {
                 }
             }
         }
-
-        stage('Health Check') {
-            steps {
-                script {
-                    if (env.BRANCH_NAME == "dev") {
-                        sh "docker ps | grep ${APP_NAME}-dev"
-                    }
-                    if (env.BRANCH_NAME == "prod") {
-                        sh "docker ps | grep ${APP_NAME}-prod"
-                    }
-                }
-            }
-        }
     }
 
     post {
         success {
-            echo " SUCCESS for ${env.BRANCH_NAME}"
+            echo "SUCCESS for ${env.BRANCH_NAME}"
         }
         failure {
-            echo " FAILED for ${env.BRANCH_NAME}"
-        }
-    }
-
-                }
-            }
-        }
-
-        stage('Health Check') {
-            steps {
-                script {
-                    if (env.BRANCH_NAME == "dev") {
-                        sh "docker ps | grep ${APP_NAME}-dev"
-                    }
-                    if (env.BRANCH_NAME == "prod") {
-                        sh "docker ps | grep ${APP_NAME}-prod"
-                    }
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo " SUCCESS for ${env.BRANCH_NAME}"
-        }
-        failure {
-            echo " FAILED for ${env.BRANCH_NAME}"
+            echo "FAILED for ${env.BRANCH_NAME}"
         }
     }
 }
